@@ -11,14 +11,8 @@ function Test() {
     const leaderRef = useRef(null)
     const wordAreaRef = useRef(null)
     const [leaderPos , setLeaderPos] = useState({top:0 , left:0})
-    const [lastTop , setLastTop] = useState({top:0 , left:0})
-    let intialTopOfTheLeader
-    let intialLeftOfTheLeader
 
-    useEffect(() => {
-        intialTopOfTheLeader = leaderRef.current.getBoundingClientRect().top
-        intialLeftOfTheLeader = leaderRef.current.getBoundingClientRect().left
-    } , [])
+
 
 
     const keys = [
@@ -59,8 +53,10 @@ function Test() {
     const [pressed , setPressed] = useState(wordsMap)
 
 
+
     useEffect(() => {
         const handleKeyDown = (event) => {
+            event.preventDefault()
         if (keys.includes(event.key) && words[currentLetter] != ' ') {
             // Check if the typed letter matches the current letter
             if (event.key == words[currentLetter]) {
@@ -107,11 +103,6 @@ function Test() {
 
     useEffect(() => {
         try{
-            if(leaderPos == {top:0 , left:0}){
-                setLastTop({top:leaderRef.current.getBoundingClientRect().top , left:leaderRef.current.getBoundingClientRect().left})
-            }else{
-                setLastTop(leaderPos)
-            }
             setLeaderPos({top:leaderRef.current.getBoundingClientRect().top , left:leaderRef.current.getBoundingClientRect().left})
             // console.log(leaderPos)
         }catch(e){
@@ -119,6 +110,12 @@ function Test() {
         }
     } , [currentLetter])
 
+    // useEffect(() => {
+    //     if(leaderPos.top != 0){
+    //         console.log("new line")
+    //         wordAreaRef.current.scrollTop += 1;
+    //     }
+    // } , [leaderPos.top])
 
 
 
@@ -161,7 +158,7 @@ function Test() {
             
         </div>
         {/* ------------------- Words ---------------------- */}
-        <div className={`${isOpacity0 ? "opacity-0" : "opacity-100"} "opacity-0" duration-150 transition-all flex flex-wrap text-6xl text-white w-[80%] mx-auto mt-16 font-semibold `} ref={wordAreaRef}>
+        <div className={`${isOpacity0 ? "opacity-0" : "opacity-100"} "opacity-0" duration-150 transition-all flex flex-wrap text-6xl text-white w-[80%] mx-auto mt-16 font-semibold overflow-auto max-h-[40vh]`} ref={wordAreaRef}>
             <div className={`z-50 bg-orange-500 w-1 h-[5rem] rounded-full ${currentLetter == 0 ? "animate-fadeInOut" : ""} absolute transition-all`}
             style={{left:leaderPos.left , top:leaderPos.top}}></div>
             {words.map((letter , index) => {
