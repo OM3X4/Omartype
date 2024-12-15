@@ -22,7 +22,7 @@ function App() {
               <h1 className=" text-white text-4xl ml-3 font-semibold">omar<span className="text-orange-700">type</span></h1>
             </div>
             {/* ----------------- nav bar ------------------- */}
-            <div className="flex items-center justify-center text-[#555555] gap-5 text-2xl ml-10 cursor-pointer">
+            <div className="flex items-center justify-center text-[#555555] gap-5 text-2xl ml-1 pt-5 cursor-pointer">
               <FaKeyboard className="hover:text-orange-700 transition-all"/>
               <FaCrown className="hover:text-orange-700 transition-all"/>
               <IoMdSettings className="hover:text-orange-700 transition-all"/>
