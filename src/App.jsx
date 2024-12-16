@@ -3,7 +3,9 @@ import { IoMdSettings } from "react-icons/io";
 import { FaCrown } from "react-icons/fa"; 
 import { FaKeyboard } from "react-icons/fa"; 
 import { useState } from 'react'
+import { Routes , Route } from "react-router";
 import Test from "./test";
+import { Result } from "postcss";
 
 
 
@@ -29,7 +31,10 @@ function App() {
             </div>
           </div>
           <div>
-            <Test />
+            <Routes>
+              <Route path="/" element={<Test />}/>
+              <Route path="/Result" element={<Result />}/>
+            </Routes>
           </div>
       </div>
     </>

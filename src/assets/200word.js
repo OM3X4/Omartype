@@ -140,4 +140,3 @@ export const wordsOrigin = [
 ];
 
 
-console.log(wordsOrigin.length)
