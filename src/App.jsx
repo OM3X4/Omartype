@@ -2,15 +2,26 @@
 import { IoMdSettings } from "react-icons/io"; 
 import { FaCrown } from "react-icons/fa"; 
 import { FaKeyboard } from "react-icons/fa"; 
-import { useState } from 'react'
-import { Routes , Route } from "react-router";
+import { useState , createContext , useContext , useEffect } from 'react'
+import { Routes , Route , Link } from "react-router";
 import Test from "./test";
-import { Result } from "postcss";
+import Results from "./results";
+
+export const Settings = createContext()
 
 
 
 
 function App() {
+
+  const [settings , setSettings] = useState({primaryColor:"#ffffff"})
+
+
+  useEffect(() => {
+      console.log(settings)
+  })
+
+
 
 
   return (
@@ -25,16 +36,18 @@ function App() {
             </div>
             {/* ----------------- nav bar ------------------- */}
             <div className="flex items-center justify-center text-[#555555] gap-5 text-2xl ml-1 pt-5 cursor-pointer">
-              <FaKeyboard className="hover:text-orange-700 transition-all"/>
+              <Link to={"/"}><FaKeyboard className="hover:text-orange-700 transition-all"/></Link>
               <FaCrown className="hover:text-orange-700 transition-all"/>
               <IoMdSettings className="hover:text-orange-700 transition-all"/>
             </div>
           </div>
           <div>
-            <Routes>
-              <Route path="/" element={<Test />}/>
-              <Route path="/Result" element={<Result />}/>
-            </Routes>
+            <Settings.Provider value={[settings , setSettings]} >
+              <Routes>
+                <Route path="/" element={<Test />}/>
+                <Route path="/results" element={<Results />}/>
+              </Routes>
+            </Settings.Provider>
           </div>
       </div>
     </>
