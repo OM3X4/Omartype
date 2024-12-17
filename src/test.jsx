@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { wordsOrigin } from "./assets/200word";
+import { VscDebugRestart } from "react-icons/vsc";
 import { RiRestartLine } from "react-icons/ri"; 
 import { TbLetterA } from "react-icons/tb"; 
 import { BiHash } from "react-icons/bi"; 
@@ -20,7 +21,7 @@ import { Settings } from "./App";
 function Test() {
     
     const [settings , setSettings] = useContext(Settings)
-
+    console.log(settings.primaryColor)
 
     const navigate = useNavigate()
     
@@ -134,24 +135,33 @@ function Test() {
 
     useEffect(() => {
         const handleKeyDown = (event) => {
-            event.preventDefault()
+        if(keys.includes(event.key)) event.preventDefault();
+
         if (keys.includes(event.key) && words[currentLetter] != ' ') {
             // Check if the typed letter matches the current letter
             if (event.key == words[currentLetter]) {
               // Create a new map with updated state
                 setPressed((prev) => new Map(prev).set(currentLetter, 1)); // Correct
-                setRightLetters(prev => prev + 1)
-            } else {
-              // Create a new map with updated state
-                setPressed((prev) => new Map(prev).set(currentLetter, 2)); // Incorrect
                 
+                setRightLetters(prev => prev + 1)
+
+                setCurrentLetter((prev) => prev + 1);
+                if(wordAreaRef.current && currentLetterRef.current){
+                    wordAreaRef.current.scrollLeft += currentLetterRef.current.offsetWidth
+                }
+            }else if(settings.stopOnError){
+
+            }else {
+              // Create a new map with updated state
+                setPressed((prev) => new Map(prev).set(currentLetter, (settings.blindMode ? 1 : 2))); // Incorrect
+                
+                setCurrentLetter((prev) => prev + 1);
+                if(wordAreaRef.current && currentLetterRef.current){
+                    wordAreaRef.current.scrollLeft += currentLetterRef.current.offsetWidth
+                }
             
             }
-            // Move to the next letter
-            setCurrentLetter((prev) => prev + 1);
-            if(wordAreaRef.current && currentLetterRef.current){
-                wordAreaRef.current.scrollLeft += currentLetterRef.current.offsetWidth
-            }
+            
             
         }else if(event.key == ' ' && words[currentLetter] == ' '){
             event.preventDefault()
@@ -160,7 +170,7 @@ function Test() {
             setPressed((prev) => new Map(prev).set(currentLetter, 1)); // Correct
             setCurrentLetter((prev) => prev + 1);
         }
-        else if(event.key == "Backspace" && currentLetter > 0){
+        else if(event.key == "Backspace" && currentLetter > 0 && !settings.confidenceMode){
             wordAreaRef.current.scrollLeft -= currentLetterRef.current.offsetWidth
             const omar = currentLetter
             setCurrentLetter(prev => prev - 1)
@@ -250,23 +260,23 @@ function Test() {
     return (
     <div className={` pt-5 ${isOpacity0 ? "opacity-0" : ""} transition-all`}>
         {/* --------------- Settings Bar -------------------- */}
-        <div className=" flex items-center justify- bg-[#151515] w-fit mx-auto py-3 px-10 rounded-xl">
+        <div className=" flex items-center w-fit mx-auto py-3 px-10 rounded-xl" style={{backgroundColor:settings.settingsbarColor}}>
             {/* ------------------- punc and numbers ---------------- */}
             <div className=" flex items-center justify-center gap-5">
-                <div className={`${!isPunc ? "text-[#555555]" : "text-orange-500"} flex items-center justify-center gap-1 hover:text-white transition-all cursor-pointer`} onClick={() => setIsPunc(prev => !prev)}><BiAt />Punctuation</div>
-                <div className={`${!isNum ? "text-[#555555]" : "text-orange-500"} flex items-center justify-center gap-1 hover:text-white transition-all cursor-pointer`} onClick={() => setIsNum(prev => !prev)}><BiHash />Numbers</div>
+                <div className={`flex items-center justify-center gap-1 hover:text-white transition-all cursor-pointer`} onClick={() => setIsPunc(prev => !prev)} style={{color:(!isPunc ? settings.paragraphColor : settings.primaryColor)}}><BiAt />Punctuation</div>
+                <div className={`flex items-center justify-center gap-1 hover:text-white transition-all cursor-pointer`} onClick={() => setIsNum(prev => !prev)} style={{color:(!isNum ? settings.paragraphColor : settings.primaryColor)}}><BiHash />Numbers</div>
             </div>
-            <div className=" w-1 h-6 rounded-full bg-black mx-5"></div>
+            <div className=" w-1 h-6 rounded-full  mx-5" style={{backgroundColor:settings.paragraphColor}}></div>
             {/* ----------------- Mode ---------------- */}
             <div className=" flex items-center justify-center gap-5">
-                <div className={`${true ? "text-[#555555]" : "text-orange-500"} flex items-center justify-center gap-1 hover:text-white transition-all cursor-pointer`}><TbLetterA />Words</div>
+                <div className={` flex items-center justify-center gap-1 hover:text-white transition-all cursor-pointer`} style={{color:settings.primaryColor}}><TbLetterA />Words</div>
             </div>
-            <div className=" w-1 h-6 rounded-full bg-black mx-5"></div>
-                <div className=" flex items-center justify-center gap-7 text-[#555555] cursor-pointer font-semibold">
-                    <div className={`${wordNum == 10 ? "text-orange-500" : "text-[#555555]"} hover:text-white transition-all`} onClick={() => {setWordNum(10);changeModeHandler(10);tapeModeHandler()}}>10</div>
-                    <div className={`${wordNum == 25 ? "text-orange-500" : "text-[#555555]"} hover:text-white transition-all`} onClick={() => {setWordNum(25);changeModeHandler(25);tapeModeHandler()}}>25</div>
-                    <div className={`${wordNum == 50 ? "text-orange-500" : "text-[#555555]"} hover:text-white transition-all`} onClick={() => {setWordNum(50);changeModeHandler(50);tapeModeHandler()}}>50</div>
-                    <div className={`${wordNum == 100 ? "text-orange-500" : "text-[#555555]"} hover:text-white transition-all`} onClick={() => {setWordNum(100);changeModeHandler(100);tapeModeHandler()}}>100</div>
+            <div className=" w-1 h-6 rounded-full bg-black mx-5"  style={{backgroundColor:settings.paragraphColor}}></div>
+                <div className=" flex items-center justify-center gap-7 cursor-pointer font-semibold">
+                    <div className={` hover:text-white transition-all`} onClick={() => {setWordNum(10);changeModeHandler(10);tapeModeHandler()}} style={{color:(wordNum == 10 ? settings.primaryColor : settings.paragraphColor)}}>10</div>
+                    <div className={` hover:text-white transition-all`} onClick={() => {setWordNum(25);changeModeHandler(25);tapeModeHandler()}} style={{color:wordNum == 25 ? settings.primaryColor : settings.paragraphColor}}>25</div>
+                    <div className={` hover:text-white transition-all`} onClick={() => {setWordNum(50);changeModeHandler(50);tapeModeHandler()}} style={{color:wordNum == 50 ? settings.primaryColor : settings.paragraphColor}}>50</div>
+                    <div className={` hover:text-white transition-all`} onClick={() => {setWordNum(100);changeModeHandler(100);tapeModeHandler()}} style={{color:wordNum == 100 ? settings.primaryColor : settings.paragraphColor}}>100</div>
                 </div>
         </div>
         {/* ------------------- Words ---------------------- */}
@@ -277,7 +287,7 @@ function Test() {
                 return(
                     <div className=" flex items-center justify-center relative">
                         {index == currentLetter ? <div className={` bg-orange- w-1 h-[80%] rounded-full ${currentLetter == 0 ?  "animate-fadeInOut" : ""} absolute left-0 transition-all`} ref={leaderRef}></div> : ""}
-                        <div className={`py-3 ${pressed.get(index) == 1 ? "text-orange-500" : (pressed.get(index) == 2 ?  "text-red-800" : "text-[#555555]")} transition-all duration-150 text-6xl font-semibold`} ref={currentLetter == index ? currentLetterRef : null}>
+                        <div className={`py-3  transition-all duration-150 text-6xl font-semibold`} ref={currentLetter == index ? currentLetterRef : null} style={{color:(pressed.get(index) == 1 ? settings.primaryColor : (pressed.get(index) == 2 ?  settings.errorColor : settings.paragraphColor))}}>
                             {letter == ' ' ? '\u00A0' : letter}
                         </div>
                     </div>
@@ -291,7 +301,7 @@ function Test() {
             setTimeout(() => {
                 setIsOpacity0(false)
             } , 400)}}>
-            <RiRestartLine className="hover:text-orange-500 hover:rotate-[200deg] transition-all duration-300"/>
+            <VscDebugRestart className={`hover:text-white text-[#4e4e4e] hover:-rotate-[200deg] transition-all duration-300 font-black`}/>
         </div>
         <div className={`${isOpacity0 ? "opacity-0" : ""} transition-all text-white flex items-center justify-center mt-10 absolute bottom-10 left-[calc(45%)]`}>
             <div className=" text-black bg-[#555555] rounded-sm px-1 m-2">tab </div>
