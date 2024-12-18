@@ -8,4 +8,5 @@ export default defineConfig({
     host: '0.0.0.0', // Bind to all interfaces (local and network)
     port: 3000,      // Optional: Set your desired port (default is 5173)
   },
+  base: "/Omartype/"
 })
