@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { wordsOrigin } from "./assets/200word";
+import { wordsOriginWithNumbers } from "./assets/200word";
 import { VscDebugRestart } from "react-icons/vsc";
 import { RiRestartLine } from "react-icons/ri"; 
 import { TbLetterA } from "react-icons/tb"; 
@@ -8,20 +9,41 @@ import { BiAt } from "react-icons/bi";
 import React , { useEffect, useState ,useRef , useContext } from 'react';
 import { useNavigate } from "react-router";
 
+import TypeWriter from "../public/TypeWriter.wav"
+import Pop from "../public/pop.wav"
+import Error from "../public/error.wav"
+
 import { Settings } from "./App";
 
 
-
-
-
-
-
-
-
 function Test() {
+
+
     
-    const [settings , setSettings] = useContext(Settings)
-    console.log(settings.primaryColor)
+    const audioRef = useRef(new Audio(TypeWriter))
+    const errorAudioRef = useRef(new Audio(Error))
+    const playAudio = () => {
+        const audio = audioRef.current;
+
+        // Stop the audio if it’s already playing
+        audio.pause();
+        audio.currentTime = 0;
+
+        // Play the audio from the start
+        audio.play();
+    };
+    const playAudioError = () => {
+        const audio = errorAudioRef.current;
+
+        // Stop the audio if it’s already playing
+        audio.pause();
+        audio.currentTime = 0;
+
+        // Play the audio from the start
+        audio.play();
+    };
+
+    const [settings , setSettings , leaderBoard , setLeaderBoard] = useContext(Settings)
 
     const navigate = useNavigate()
     
@@ -40,9 +62,8 @@ function Test() {
         'g', 'G', 'h', 'H', 'i', 'I', 'j', 'J', 'k', 'K', 'l', 'L',
         'm', 'M', 'n', 'N', 'o', 'O', 'p', 'P', 'q', 'Q', 'r', 'R',
         's', 'S', 't', 'T', 'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X',
-        'y', 'Y', 'z', 'Z'
+        'y', 'Y', 'z', 'Z' , '1' , '2' , '3' , '4' , '5' , '6' , '7' , '8' , '9' , '0'
     ]
-    const [isPunc , setIsPunc] = useState(false)
     const [isNum , setIsNum] = useState(false)
     const [wordNum , setWordNum] = useState(10)
     const [isOpacity0 , setIsOpacity0] = useState(true)
@@ -79,8 +100,9 @@ function Test() {
             if(i > 0){
                 result.push(' ')
             }
-            const randomNumber = Math.floor(Math.random() * 138);
-            result.push(...wordsOrigin[randomNumber])
+            const randomNumber = Math.floor(Math.random() * (isNum ? 275 :138));
+            let copy = isNum ? wordsOriginWithNumbers[randomNumber] : wordsOrigin[randomNumber]
+            result.push(...copy)
         }
         
         setIsOpacity0(true);
@@ -107,8 +129,9 @@ function Test() {
             if(i > 0){
                 result.push(' ')
             }
-            const randomNumber = Math.floor(Math.random() * 138);
-            result.push(...wordsOrigin[randomNumber])
+            const randomNumber = Math.floor(Math.random() * (isNum ? 275 :138));
+            let copy = isNum ? wordsOriginWithNumbers[randomNumber] : wordsOrigin[randomNumber]
+            result.push(...copy)
         }
         setWords(result)
         if (wordAreaRef) {
@@ -140,6 +163,7 @@ function Test() {
         if (keys.includes(event.key) && words[currentLetter] != ' ') {
             // Check if the typed letter matches the current letter
             if (event.key == words[currentLetter]) {
+                playAudio()
               // Create a new map with updated state
                 setPressed((prev) => new Map(prev).set(currentLetter, 1)); // Correct
                 
@@ -149,9 +173,13 @@ function Test() {
                 if(wordAreaRef.current && currentLetterRef.current){
                     wordAreaRef.current.scrollLeft += currentLetterRef.current.offsetWidth
                 }
+
             }else if(settings.stopOnError){
 
             }else {
+
+                playAudioError()
+
               // Create a new map with updated state
                 setPressed((prev) => new Map(prev).set(currentLetter, (settings.blindMode ? 1 : 2))); // Incorrect
                 
@@ -192,7 +220,6 @@ function Test() {
             } , 400)
             wordAreaRef.current.scrollLeft = 0
         }
-        // console.log(event.key == ' ' , words[currentLetter] == ' ' , keys.includes(event.key))
     
         };
     
@@ -209,11 +236,10 @@ function Test() {
         if(currentLetter == 1){
             setStartDate(new Date())
         }else if(currentLetter >= words.length){
-            const omar = new Date()
+            let omar = new Date()
             setTakenTime((omar.getTime() - startDate.getTime()) / 1000)
             setWpm((rightLetters * 12) / ((omar.getTime() - startDate.getTime()) / 1000))
             setRawWpm((words.length * 12) / ((omar.getTime() - startDate.getTime()) / 1000))
-            console.log()
             navigate("/results" , {state: {
                 speed: (rightLetters * 12) / ((omar.getTime() - startDate.getTime()) / 1000) , 
                 rawWpm:(words.length * 12) / ((omar.getTime() - startDate.getTime()) / 1000),
@@ -221,12 +247,14 @@ function Test() {
                 accuracy: (rightLetters / words.length) * 100,
                 testType: wordNum
             }})
-            console.log((rightLetters * 12) / ((omar.getTime() - startDate.getTime()) / 1000))
+            let kareem = omar.toLocaleString('en-US', {weekday: 'long',year: 'numeric',month: 'long',day: 'numeric',hour: 'numeric',minute: 'numeric',second: 'numeric',timeZoneName: 'short'})
+            console.log(kareem)
+            window.localStorage.setItem("leaderBoard" , JSON.stringify([...leaderBoard , {wpm:(rightLetters * 12) / ((omar.getTime() - startDate.getTime()) / 1000) , rawWpm:(words.length * 12) / ((omar.getTime() - startDate.getTime()) / 1000), time: (omar.getTime() - startDate.getTime()) / 1000,accuracy: (rightLetters / words.length) * 100,testType: wordNum, date:kareem}]))
+            setLeaderBoard(prev => [...prev , {wpm:(rightLetters * 12) / ((omar.getTime() - startDate.getTime()) / 1000) , rawWpm:(words.length * 12) / ((omar.getTime() - startDate.getTime()) / 1000), time: (omar.getTime() - startDate.getTime()) / 1000,accuracy: (rightLetters / words.length) * 100,testType: wordNum, date:kareem}])
         }
         try{
             setLeaderPos({top:leaderRef.current.getBoundingClientRect().top , left:leaderRef.current.getBoundingClientRect().left})
         }catch(e){
-            // console.log("problem with the caret")
         }
     } , [currentLetter])
 
@@ -263,8 +291,7 @@ function Test() {
         <div className=" flex items-center w-fit mx-auto py-3 px-10 rounded-xl" style={{backgroundColor:settings.settingsbarColor}}>
             {/* ------------------- punc and numbers ---------------- */}
             <div className=" flex items-center justify-center gap-5">
-                <div className={`flex items-center justify-center gap-1 hover:text-white transition-all cursor-pointer`} onClick={() => setIsPunc(prev => !prev)} style={{color:(!isPunc ? settings.paragraphColor : settings.primaryColor)}}><BiAt />Punctuation</div>
-                <div className={`flex items-center justify-center gap-1 hover:text-white transition-all cursor-pointer`} onClick={() => setIsNum(prev => !prev)} style={{color:(!isNum ? settings.paragraphColor : settings.primaryColor)}}><BiHash />Numbers</div>
+                <div className={`flex items-center justify-center gap-1 hover:text-white transition-all cursor-pointer`} onClick={() => {setIsNum(prev => !prev);tapeModeHandler()}} style={{color:(!isNum ? settings.paragraphColor : settings.primaryColor)}}><BiHash />Numbers</div>
             </div>
             <div className=" w-1 h-6 rounded-full  mx-5" style={{backgroundColor:settings.paragraphColor}}></div>
             {/* ----------------- Mode ---------------- */}
@@ -281,8 +308,8 @@ function Test() {
         </div>
         {/* ------------------- Words ---------------------- */}
         <div id="wordArea" className={`${isOpacity0 ? "opacity-0" : "opacity-100"} "opacity-0" duration-150 transition-all flex  text-6xl text-white max-w-[90%] mx-auto mt-10 font-semibold overflow-x-auto no-scrollbar max-h-[40vh] flex-wrap ${!isTapeMode ? "max-h-[40vh] ":"flex-nowrap pl-64"}`} ref={wordAreaRef}>
-            <div className={`z-50 bg-orange-500 w-1 h-[5rem] rounded-full ${currentLetter == 0 ? "animate-fadeInOut" : ""} absolute transition-all`}
-            style={{left:leaderPos.left , top:leaderPos.top}}></div>
+            <div className={`z-50 w-1 h-[5rem] rounded-full ${currentLetter == 0 ? "animate-fadeInOut" : ""} absolute transition-all`}
+            style={{left:leaderPos.left , top:leaderPos.top , backgroundColor:settings.primaryColor}}></div>
             {words.map((letter , index) => {
                 return(
                     <div className=" flex items-center justify-center relative">
